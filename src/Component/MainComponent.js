@@ -74,14 +74,6 @@ class Main extends Component {
 
     }
 
-
-    componentDidUpdate() {
-        // if(this.state.valid){
-        //     console.log('scroll to bottom');
-        //     this.scrollToBottom();
-        // }   
-    }
-
     // scroll to bottom
     scrollToBottom = () => {
         this.myRef.scrollIntoView({ behavior: "smooth" });
@@ -178,6 +170,7 @@ class Main extends Component {
                             value={this.state.roomName} 
                             onChange = {(e) => this.handleNameChange(e)}
                             autoComplete='off'
+                            autoFocus
                         >    
                         </Input>
                     </FormGroup>
@@ -229,12 +222,14 @@ class Main extends Component {
                         placeholder="Handle" value={this.state.name} 
                         onChange={(e) => this.handleName(e)} 
                         autoComplete = "off"
+                        autoFocus
                     />
                     <input id="message" type="text" name = 'message' 
                         placeholder="Message" value={this.state.message} 
                         onChange = {e => this.handleMessage(e)}
                         onKeyPress = {this.showIsTyping}
                         autoComplete = "off"
+                        required
                     />
                     
                     <button id="send" type='submit' >Send</button>
