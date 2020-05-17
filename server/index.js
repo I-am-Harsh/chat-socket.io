@@ -8,6 +8,14 @@ var app = express();
 var server = app.listen(9000, function(){
     console.log('listening for requests on port 9000,');
 });
+
+// mongoose  stuff
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
+
+// connection to mongo
 mongoose.connect("mongodb://localhost:27017/chat")
 .then(() => {
     console.log("Connected to DB");
@@ -19,10 +27,6 @@ app.use(express.static('public'));
 var io = socket(server);
 io.on('connection', (socket) => {
 
-    // confirm connection to client
-    socket.emit('connected',"online", socket.id);
-    
-
     // check db for room
     socket.on('checkCreds', (data) => {
         Chat.findOne({name : data.name})
@@ -32,10 +36,7 @@ io.on('connection', (socket) => {
                 if(result.password === data.password){
                     socket.emit('matched',true);
                     // join room
-
                     socket.join(data.name);
-                    socket.emit('joined','you joined');
-                    console.log(`Joined ${data.name} room by ${socket.id}`)
                 }
                 // when password is wrong
                 else{
@@ -50,7 +51,6 @@ io.on('connection', (socket) => {
 
                     // join room
                     socket.join(data.name);
-                    console.log(`Joined ${data.name} room by ${socket.id}`)
                 })
                 .catch(err => console.log(err))
             }
@@ -64,14 +64,26 @@ io.on('connection', (socket) => {
     //     socket.emit('oldChat', docs);
     // })
 
-    // print client in console
-    console.log('made socket connection', socket.id );
+
 
     // print message in console and send it back
     socket.on('msg', (data, roomName) => {
-        console.log("Data recived : ", data, "by : ", socket.id, roomName);
         io.in(roomName).emit('receiveChat', data);
         
     })
+
+    // send if a user is typing
+    socket.on('typing', (name, roomName) => {
+        socket.in(roomName).emit('isTyping', name);
+    })
+
+    // if typing stopped
+    socket.on('stoppedTyping', (roomName) => {
+        socket.in(roomName).emit('typeStop');
+    })
+
+    // remove from room logic
+
+    // delete room
 
 });
