@@ -7,6 +7,7 @@ class Main extends Component {
 
     constructor(props){
         super(props);
+        // this.el = React.createRef();    
         this.state = {
             roomName : '',
             password : '',
@@ -54,6 +55,7 @@ class Main extends Component {
             this.setState({
                 chat : chatNew
             })
+            this.scrollToBottom();
         })
 
         // show UI change if a person types
@@ -69,6 +71,20 @@ class Main extends Component {
                 typeName : ''
             })
         })
+
+    }
+
+
+    componentDidUpdate() {
+        // if(this.state.valid){
+        //     console.log('scroll to bottom');
+        //     this.scrollToBottom();
+        // }   
+    }
+
+    // scroll to bottom
+    scrollToBottom = () => {
+        this.myRef.scrollIntoView({ behavior: "smooth" });
     }
 
     handleNameChange = (e) => {
@@ -108,6 +124,10 @@ class Main extends Component {
         // send message to server
         this.socket.emit('msg', data, this.state.roomName)
         this.socket.emit('stoppedTyping', this.state.roomName);
+        if(this.state.valid){
+            console.log('scroll to bottom');
+            this.scrollToBottom();
+        }   
     }
 
     // change name of the user
@@ -200,6 +220,9 @@ class Main extends Component {
                             <i>{this.state.typeName} is typing a message...</i>
                         </div>
                     }
+                    <div style={{ float:"left", clear: "both" }}
+                        ref={ (ref) => this.myRef = ref } id='chat'>
+                    </div>
                 </div>
                 <form onSubmit={e => this.sendChat(e)}>
                     <input id="handle" type="text" name = 'name' 
@@ -213,6 +236,7 @@ class Main extends Component {
                         onKeyPress = {this.showIsTyping}
                         autoComplete = "off"
                     />
+                    
                     <button id="send" type='submit' >Send</button>
                 </form>
             </div>
