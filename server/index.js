@@ -28,7 +28,7 @@ var io = socket(server);
 io.on('connection', (socket) => {
 
     // check db for room
-    socket.on('checkCreds', (data) => {
+    socket.on('checkCreds', (data, userName) => {
         Chat.findOne({name : data.name})
         .then((result) => {
             if(result !== null){
@@ -36,7 +36,9 @@ io.on('connection', (socket) => {
                 if(result.password === data.password){
                     socket.emit('matched',true);
                     // join room
-                    socket.join(data.name);
+                    socket.join(data.name, () => {
+                        socket.in(data.name).emit('user joined', userName);
+                    });
                 }
                 // when password is wrong
                 else{
@@ -50,21 +52,15 @@ io.on('connection', (socket) => {
                     socket.emit('newRoom', true)
 
                     // join room
-                    socket.join(data.name);
+                    socket.join(data.name, () => {
+                        socket.in(data.name).emit('user joined', userName);
+                    });
                 })
                 .catch(err => console.log(err))
             }
         })
         .catch(err =>  console.log(err));
     })
-
-    // get old chat data and emit
-    // Chat.find({}).sort({createdAt : -1}).exec((err, docs) => {
-    //     if(err) return console.log(err)
-    //     socket.emit('oldChat', docs);
-    // })
-
-
 
     // print message in console and send it back
     socket.on('msg', (data, roomName) => {

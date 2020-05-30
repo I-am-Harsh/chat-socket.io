@@ -16,13 +16,14 @@ class Main extends Component {
             message : '',
             chat : '',
             isTyping : false,
-            typeName : ''
+            typeName : '',
+            joinedUser : ''
         }
     }
 
     componentDidMount(){
         // make connection
-        this.socket = io.connect('localhost:9000')
+        this.socket = io.connect(window.location.hostname + ":9000");
 
         // if room already exists
         this.socket.on('matched', (message) => {
@@ -72,6 +73,21 @@ class Main extends Component {
             })
         })
 
+        // when a new user joins
+        this.socket.on('user joined', (userName) => {
+            console.log("user joined");
+            console.log(this.state.chat);
+            var userJoin = [...this.state.chat];
+            console.log(userName);
+            var newJoin = {
+                name : userName,
+                message : 'joined'
+            };
+            userJoin.push(newJoin);
+            this.setState({
+                chat : userJoin
+            })
+        })
     }
 
     // scroll to bottom
@@ -91,14 +107,16 @@ class Main extends Component {
         })
     }
 
+    // room create area
     startChat = (event) => {
         event.preventDefault();
         var data = {
             name : this.state.roomName,
             password : this.state.password
         }
+
         // check creds from DB
-        this.socket.emit('checkCreds',data);
+        this.socket.emit('checkCreds',data, this.state.roomName);
     }
 
     // chat logic
@@ -180,6 +198,13 @@ class Main extends Component {
                         value={this.state.password} onChange = {(e) => this.handlePasswordChange(e)}></Input>
                     </FormGroup>
                     <FormGroup>
+                        <Input type='text' name='name' 
+                            onChange = {(e) => this.handleName(e)} 
+                            placeholder='Your nickname'
+                            value={this.state.name} required
+                        />
+                    </FormGroup>
+                    <FormGroup>
                         <Button type='submit' outline color='success'>Submit</Button>
                     </FormGroup>
                 </Form>
@@ -190,22 +215,22 @@ class Main extends Component {
             <div id="mario-chat">
                 <h2>{this.state.roomName} Chat</h2>
                 <div id="chat-window">
-                    <div id="output">
-                    {
-                        this.state.chat &&
-                        this.state.chat.map((chat, index) => {
-                            return(
-                                this.chatSide(chat.name) ?
-                                    <div className='row ml-3 mb-1' key={index}>
-                                        You : {chat.message}
-                                    </div>
-                                :
-                                    <div className='row ml-3 mb-1' key={index}>
-                                        {chat.name} : {chat.message}
-                                    </div>
-                            );
-                        })
-                    }
+                    <div className = "output">
+                        {
+                            this.state.chat &&
+                            this.state.chat.map((chat, index) => {
+                                return(
+                                    this.chatSide(chat.name) ?
+                                        <div className='row ml-3 mb-1' key={index}>
+                                            You : {chat.message}
+                                        </div>
+                                    :
+                                        <div className='row ml-3 mb-1' key={index}>
+                                            <i>{chat.name}</i> : {chat.message}
+                                        </div>
+                                );
+                            })
+                        }
                     </div>
                     {
                         this.state.typeName &&
@@ -222,13 +247,13 @@ class Main extends Component {
                         placeholder="Handle" value={this.state.name} 
                         onChange={(e) => this.handleName(e)} 
                         autoComplete = "off"
-                        autoFocus
                     />
                     <input id="message" type="text" name = 'message' 
                         placeholder="Message" value={this.state.message} 
                         onChange = {e => this.handleMessage(e)}
                         onKeyPress = {this.showIsTyping}
                         autoComplete = "off"
+                        autoFocus
                         required
                     />
                     
