@@ -16,8 +16,7 @@ class Main extends Component {
             message : '',
             chat : '',
             isTyping : false,
-            typeName : '',
-            joinedUser : ''
+            typeName : ''
         }
     }
 
@@ -116,7 +115,7 @@ class Main extends Component {
         }
 
         // check creds from DB
-        this.socket.emit('checkCreds',data, this.state.roomName);
+        this.socket.emit('checkCreds',data, this.state.name);
     }
 
     // chat logic
