@@ -1,0 +1,14 @@
+{
+    "name": "server",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+      "start": "node index.js"
+    },
+    "dependencies": {
+      "express": "~4.15.5",
+      "mongoose": "^5.9.14",
+      "socket.io": "^2.3.0"
+    }
+  }
+  

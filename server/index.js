@@ -5,7 +5,7 @@ var Chat = require('./model');
 
 // App setup
 var app = express();
-var server = app.listen(9000, function(){
+var server = app.listen(process.env.PORT || 9000, function(){
     console.log('listening for requests on port 9000,');
 });
 
@@ -16,7 +16,8 @@ mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 
 // connection to mongo
-mongoose.connect("mongodb://localhost:27017/chat")
+const url = "mongodb://localhost:27017/chat"
+mongoose.connect(process.env.MONGODB_URI || url)
 .then(() => {
     console.log("Connected to DB");
 })
@@ -26,7 +27,7 @@ app.use(express.static('public'));
 // Socket setup & pass server
 var io = socket(server);
 io.on('connection', (socket) => {
-
+    console.log("Connection :", socket.id);
     // check db for room
     socket.on('checkCreds', (data, userName) => {
         Chat.findOne({name : data.name})
@@ -77,9 +78,6 @@ io.on('connection', (socket) => {
     socket.on('stoppedTyping', (roomName) => {
         socket.in(roomName).emit('typeStop');
     })
-
     // remove from room logic
-
     // delete room
-
 });
